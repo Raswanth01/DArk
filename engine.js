@@ -705,37 +705,32 @@ function update() {
     bullets = bullets.filter(b => b.x > 0 && b.x < canvas.width && b.y > 0 && b.y < canvas.height);
 
     // --- ENEMY LOGIC CORE ---
+    // --- ENEMY LOGIC CORE ---
     for (let e of enemies) {
-
-        let enemyIsCloaked = false;
-
-        if (e.type === "CLOAKED") {
-
-            e.cloakTimer++;
-
-            enemyIsCloaked =
-                (e.cloakTimer % 240) < 120;
-        }
+        // 1. SAFETY BREAK: Skip processing completely if the enemy is already dead
         if (e.health <= 0) continue;
+
+        // 2. Track cloaking metrics safely on living units only
+        let enemyIsCloaked = false;
+        if (e.type === "CLOAKED") {
+            e.cloakTimer++;
+            enemyIsCloaked = (e.cloakTimer % 240) < 120;
+        }
+
+        // 3. Skip tracking/rendering loops if the unit is currently invisible
+        if (enemyIsCloaked) continue;
+
         let dx = playerX - e.x;
         let dy = playerY - e.y;
         let dist = Math.hypot(dx, dy);  
-        if (
-            e.type === "EXPLOSIVE" &&
-            dist < 20
-        ) {
 
+        // 4. Safe evaluation for explosive proximity detonation
+        if (e.type === "EXPLOSIVE" && dist < 20) {
            if (powerups.shieldHealth > 0) {
-
                 powerups.shieldHealth -= e.damage;
-
-                if (powerups.shieldHealth < 0)
-                    powerups.shieldHealth = 0;
-
+                if (powerups.shieldHealth < 0) powerups.shieldHealth = 0;
             } else {
-
                 playerHealth -= e.damage;
-
                 if (playerHealth <= 0){
                     sounds.bgm.pause();
                     sounds.lockdownMusic.pause();
@@ -762,8 +757,6 @@ function update() {
             continue;
         }
 
-        
-
         let playerVisible = false;
         if (powerups.invisibilityTimer <= 0 && dist < e.viewDist) {
             let angleToPlayer = Math.atan2(dy, dx);
@@ -773,14 +766,7 @@ function update() {
             if (diff < e.fovAngle / 2) {
                 let pathBlocked = false;
                 for (let seg of wallSegments) {
-
-                    let hit = checkLineIntercept(
-                        { x: e.x, y: e.y },
-                        { x: playerX, y: playerY },
-                        seg.start,
-                        seg.end
-                    );
-
+                    let hit = checkLineIntercept({ x: e.x, y: e.y }, { x: playerX, y: playerY }, seg.start, seg.end);
                     if (hit) {
                         pathBlocked = true;
                         break;
@@ -794,60 +780,26 @@ function update() {
 
         if (e.state === "PATROL") {
             if (e.patrolAxis === "VERTICAL") {
-
                 let nextBotY = e.y + (e.speed * 0.4 * e.direction);
-
-                if (
-                    checkEntityMatrixCollision(
-                        e.x,
-                        nextBotY + (e.radius * e.direction),
-                        e.radius
-                    ) === 0
-                ) {
-
+                if (checkEntityMatrixCollision(e.x, nextBotY + (e.radius * e.direction), e.radius) === 0) {
                     e.direction *= -1;
-
                 } else {
-
                     e.y = nextBotY;
                 }
-
-                e.angle =
-                    e.direction === 1
-                        ? Math.PI / 2
-                        : -Math.PI / 2;
-
+                e.angle = e.direction === 1 ? Math.PI / 2 : -Math.PI / 2;
             } else {
-
-                let nextBotX =
-                    e.x + (e.speed * 0.4 * e.direction);
-
-                if (
-                    checkEntityMatrixCollision(
-                        nextBotX + (e.radius * e.direction),
-                        e.y,
-                        e.radius
-                    ) === 0
-                ) {
-
+                let nextBotX = e.x + (e.speed * 0.4 * e.direction);
+                if (checkEntityMatrixCollision(nextBotX + (e.radius * e.direction), e.y, e.radius) === 0) {
                     e.direction *= -1;
-
                 } else {
-
                     e.x = nextBotX;
                 }
-
-                e.angle =
-                    e.direction === 1
-                        ? 0
-                        : Math.PI;
+                e.angle = e.direction === 1 ? 0 : Math.PI;
             }
 
             if (powerups.invisibilityTimer <= 0) {
                 if (playerVisible) {
-
                     playSound(sounds.alert);
-
                     e.state = "CHASE";
                     e.loseTrackTimer = 120;
                 }
@@ -858,9 +810,7 @@ function update() {
             }
         } 
         else if (e.state === "CHASE") {
-            
             let angle = Math.atan2(dy, dx);
-            
             if (playerVisible || playerHeard) {
                 e.lastKnownX = playerX;
                 e.lastKnownY = playerY;
@@ -868,28 +818,17 @@ function update() {
                 e.loseTrackTimer = 240; 
                 
                 let stopDistance = e.stopDistance;
-
-
                 if (dist > stopDistance) {
-
-                    let nextBotX =
-                        e.x + Math.cos(angle) * e.speed;
-
-                    let nextBotY =
-                        e.y + Math.sin(angle) * e.speed;
-
+                    let nextBotX = e.x + Math.cos(angle) * e.speed;
+                    let nextBotY = e.y + Math.sin(angle) * e.speed;
                     if (checkEntityMatrixCollision(nextBotX, e.y, e.radius) === 1) e.x = nextBotX;
                     if (checkEntityMatrixCollision(e.x, nextBotY, e.radius) === 1) e.y = nextBotY;
-
                 }
                 else if (playerHeard) {
                     e.angle = angle;
                 }
 
-                if (
-                    e.type !== "EXPLOSIVE" &&
-                    frameCount % e.fireRate === 0
-                ) {
+                if (e.type !== "EXPLOSIVE" && frameCount % e.fireRate === 0) {
                     playSound(sounds.enemyShoot);
                     bullets.push({
                         x: e.x,
@@ -906,29 +845,17 @@ function update() {
             } 
             else {
                 e.loseTrackTimer--;
-                
-                let distToMemory =
-                    Math.hypot(
-                        e.lastKnownX - e.x,
-                        e.lastKnownY - e.y
-                    );
-
+                let distToMemory = Math.hypot(e.lastKnownX - e.x, e.lastKnownY - e.y);
                 if (distToMemory < 20) {
                     e.loseTrackTimer = 0;
                 }
                 let memDx = e.lastKnownX - e.x;
                 let memDy = e.lastKnownY - e.y;
-
-                let memAngle =
-                    Math.atan2(memDy, memDx);
-
+                let memAngle = Math.atan2(memDy, memDx);
                 e.angle = memAngle;
 
-                let nextBotX =
-                    e.x + Math.cos(memAngle) * (e.speed * 0.6);
-
-                let nextBotY =
-                    e.y + Math.sin(memAngle) * (e.speed * 0.6);
+                let nextBotX = e.x + Math.cos(memAngle) * (e.speed * 0.6);
+                let nextBotY = e.y + Math.sin(memAngle) * (e.speed * 0.6);
                 
                 if (checkEntityMatrixCollision(nextBotX, e.y, e.radius) === 1) e.x = nextBotX;
                 if (checkEntityMatrixCollision(e.x, nextBotY, e.radius) === 1) e.y = nextBotY;
