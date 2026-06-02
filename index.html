@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DArk: Echo Sector</title>
+    <style>
+        /* Force full screen viewport dimensions and strip scrollbars */
+        body { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            background-color: #000000; 
+            user-select: none; 
+        }
+        canvas { 
+            display: block; 
+            width: 100vw; 
+            height: 100vh; 
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script src="config.js"></script>
+    <script src="levels.js"></script>
+    <script src="engine.js"></script>
+    <script src="renderer.js"></script>
+</body>
+</html>
