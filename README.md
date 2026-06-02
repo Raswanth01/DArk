@@ -51,7 +51,7 @@ Progress through multiple facility layers by executing the following operational
 | **`Mouse`** | Rotational Target Acquisition / Aiming |
 | **`Left Click`** | Discharge Core Weapon System |
 | **`Shift`** | Walk Silently (Drastically suppresses audio footprint) |
-| **`Space`** | Activate Cloak (Deploy temporary Invisibility Matrix) |
+| **`Q`** | Activate Cloak (Deploy temporary Invisibility Matrix) |
 | **`L`** | Toggle Tactical Flashlight Array |
 | **`P`** | System Operational Pause / Resume |
 | **`R`** | Total System Diagnostic Reset (Restart Operation) |
