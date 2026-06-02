@@ -84,16 +84,16 @@ sounds.playerShoot.volume = 0.4;
 sounds.alert.volume = 0.2;
 
 function playSound(sound) {
-
     if (!sound) return;
 
-    let s = sound.cloneNode();
+    
+    if (!sound.paused) {
+        sound.currentTime = 0;
+        return;
+    }
 
-    s.volume = sound.volume;
-
-    s.currentTime = 0;
-
-    s.play();
+    sound.currentTime = 0;
+    sound.play().catch(err => console.log("Audio stream throttled safely"));
 }
 
 const ENEMY_TYPES = {
