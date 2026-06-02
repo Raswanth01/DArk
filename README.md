@@ -99,6 +99,9 @@ Progress through multiple facility layers by executing the following operational
 
 ---
 
+📦 Destructible Crates (Tile 6)
+Acts as temporary tactical cover that absorbs enemy projectiles. Each crate has 3 HP and will completely shatter into a normal floor tile when destroyed by your bullets. BEWARE: Approach and clear all crates with extreme caution, as hostile security units or hidden stalkers can easily hide behind them to ambush you the moment your line of sight is broken! Sometimes important things are hidden behind them. 
+
 ## 🔑 Security Clearances (Keycards)
 
 Electronic barrier gates block further exploration. Access restricted facility quadrants by tracking down floating physical secure chips:
